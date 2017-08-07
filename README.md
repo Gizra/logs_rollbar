@@ -17,6 +17,7 @@ This module depends on composer_manager.
 if (!empty($_ENV)) {
   $conf['logs_rollbar_url'] = 'http://api.rollbar.com/api/1/';
   $conf['logs_rollbar_uuid'] = $_ENV['PANTHEON_SITE_NAME'] . '-' . $_ENV['PANTHEON_ENVIRONMENT'];
+  }
 ```
 
 
