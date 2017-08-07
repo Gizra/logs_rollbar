@@ -13,7 +13,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Log to Rollbar enabled'),
     '#description' => t('Enable Logs Rollbar POST'),
-    '#default_value' => variable_get('logs_rollbar_enabled', TRUE),
+    '#default_value' => variable_get('logs_rollbar_enabled', FALSE),
   );
 
   $form['logs_rollbar_url'] = array(
@@ -21,13 +21,13 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#size' => 100,
     '#title' => t('Endpoint'),
     '#description' => t('The URL to POST the data to.'),
-    '#default_value' => variable_get('logs_rollbar_url', NULL),
+    '#default_value' => variable_get('logs_rollbar_url', 'http://api.rollbar.com/api/1/'),
   );
 
   $form['logs_rollbar_rollbar_access_token'] = array(
     '#type' => 'textfield',
     '#size' => 100,
-    '#title' => t('Rollbar Server Access Token'),
+    '#title' => t('Rollbar Server Access Token, from https://rollbar.com/USERID/PROJECTID/settings/access_tokens/'),
     '#default_value' => variable_get('logs_rollbar_rollbar_access_token', NULL),
   );
 
@@ -35,7 +35,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#size' => 100,
     '#title' => t('Rollbar Client Access Token (javascript)'),
-    '#description' => t('Type 0 to disable'),
+    '#description' => t('Type 0 to disable, or add your client access token from https://rollbar.com/USERID/PROJECTID/settings/access_tokens/'),
     '#default_value' => variable_get('logs_rollbar_rollbar_access_token_js', 0),
   );
 
@@ -62,7 +62,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Unique ID'),
     '#description' => t('An arbitrary ID that will identify the environment.'),
-    '#default_value' => variable_get('logs_rollbar_uuid'),
+    '#default_value' => variable_get('logs_rollbar_uuid', drupal_get_profile() . '-local'),
   );
 
   return system_settings_form($form);
