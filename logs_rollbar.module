@@ -15,7 +15,7 @@ function logs_rollbar_menu() {
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Logs Rollbar Client',
     'description' => 'Administer Rollbar Client settings.',
-    'access arguments' => array('administer logs Rollbar client'),
+    'access arguments' => array('administer rollbar'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('logs_rollbar_admin_settings'),
     'file' => 'logs_rollbar.admin.inc',
@@ -261,8 +261,8 @@ function logs_rollbar_get_registered_events() {
 function logs_rollbar_permission() {
   $permissions = array();
 
-  $permissions['administer logs http client'] = array(
-    'title' => t('Administer Logs HTTP client'),
+  $permissions['administer rollbar'] = array(
+    'title' => t('Administer Rollbar'),
   );
 
   return $permissions;
