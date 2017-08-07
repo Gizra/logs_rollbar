@@ -27,7 +27,8 @@ function logs_rollbar_admin_settings($form, &$form_state) {
   $form['logs_rollbar_rollbar_access_token'] = array(
     '#type' => 'textfield',
     '#size' => 100,
-    '#title' => t('Rollbar Server Access Token, from https://rollbar.com/USERID/PROJECTID/settings/access_tokens/'),
+    '#title' => t('Rollbar Server Access Token (Server PHP)'),
+    '#description' => t('Server access token from https://rollbar.com/USERID/PROJECTID/settings/access_tokens/'),
     '#default_value' => variable_get('logs_rollbar_rollbar_access_token', NULL),
   );
 
