@@ -1,0 +1,323 @@
+<?php
+
+/**
+ * @file
+ * Logs HTTP module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function logs_rollbar_menu() {
+  $items = array();
+
+  $items['admin/config/services/logs-http-client'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Logs Rollbar Client',
+    'description' => 'Administer Logs Client settings.',
+    'access arguments' => array('administer logs Rollbar client'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('logs_rollbar_admin_settings'),
+    'file' => 'logs_rollbar.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_boot().
+ *
+ * Runs even for cached pages.
+ */
+function logs_rollbar_boot() {
+  drupal_register_shutdown_function('logs_rollbar_shutdown');
+  set_exception_handler('_logs_rollbar_exception_handler');
+}
+
+
+/**
+ * Provides custom PHP exception handling.
+ *
+ * Uncaught exceptions are those not enclosed in a try/catch block. They are
+ * always fatal: the execution of the script will stop as soon as the exception
+ * handler exits.
+ *
+ * @param $exception
+ *   The exception object that was thrown.
+ *
+ * @see _drupal_exception_handler()
+ */
+function _logs_rollbar_exception_handler($exception) {
+  require_once DRUPAL_ROOT . '/includes/errors.inc';
+
+  try {
+    // Log the message to the watchdog and return an error page to the user.
+    _drupal_log_error(_logs_rollbar_decode_exception($exception), TRUE);
+  }
+  catch (Exception $exception2) {
+    // Another uncaught exception was thrown while handling the first one.
+    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
+    if (error_displayable()) {
+      print '<h1>Additional uncaught exception thrown while handling exception.</h1>';
+      print '<h2>Original</h2><p>' . _drupal_render_exception_safe($exception) . '</p>';
+      print '<h2>Additional</h2><p>' . _drupal_render_exception_safe($exception2) . '</p><hr />';
+    }
+  }
+}
+
+/**
+ * Decodes an exception and retrieves the correct caller.
+ *
+ * @param $exception
+ *   The exception object that was thrown.
+ *
+ * @return array
+ *   An error in the format expected by _drupal_log_error().
+ *
+ * @see _drupal_decode_exception()
+ */
+function _logs_rollbar_decode_exception($exception) {
+  $return = _drupal_decode_exception($exception);
+
+  // We have to serialize and encode the array here to prevent a notice in
+  // theme_dblog_message(). We will decode the string back in
+  // logs_rollbar_watchdog()
+  $return['exception_trace'] = drupal_base64_encode(serialize($exception->getTrace()));
+  return $return;
+
+}
+
+/**
+ * Runs on shutdown to clean up and display developer information.
+ *
+ * devel_boot() registers this function as a shutdown function.
+ */
+function logs_rollbar_shutdown() {
+  if (!$events = logs_rollbar_get_registered_events()) {
+    return;
+  }
+
+  // If not disabled.
+  if (!$url = logs_rollbar_get_http_url()) {
+    return;
+  }
+
+  // Post to rollbar.
+  logs_rollbar_rollbar_post($events, $url);
+
+}
+
+/**
+ * Run rollbar API
+ */
+function logs_rollbar_rollbar_post($events, $url) {
+  global $user;
+  $config = array(
+    // required
+    'access_token' => variable_get('logs_rollbar_rollbar_access_token', NULL),
+    'local_username' => isset($user->name) ? $user->name : 'anonymous',
+    // optional - environment name. any string will do.
+    'environment' => variable_get('logs_rollbar_uuid', 'development'),
+    'base_api_url' => $url,
+  );
+  // Log with Rollbar
+  Rollbar::init($config);
+
+  // Send events to logs.
+  foreach ($events as $event) {
+    // Send data to Logs.
+    switch ($event['severity']) {
+      case WATCHDOG_ALERT:
+      case WATCHDOG_CRITICAL:
+      case WATCHDOG_EMERGENCY:
+      case WATCHDOG_ERROR:
+        $level = 'error';
+        break;
+      case WATCHDOG_WARNING:
+        $level = 'warning';
+        break;
+      case WATCHDOG_INFO:
+      case WATCHDOG_DEBUG:
+      case WATCHDOG_NOTICE:
+        $level = 'info';
+        break;
+      default:
+        $level = 'info';
+        break;
+    }
+    Rollbar::report_message("{$event['type']} : {$event['message']}", $level, $event);
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function logs_rollbar_init() {
+
+  // If php support is turned off then return.
+  if (!variable_get('logs_rollbar_rollbar_access_token_js', 0)) {
+    return;
+  }
+  // If not disabled.
+  if (!$url = logs_rollbar_get_http_url()) {
+    return;
+  }
+  // Client settings.
+  $token = check_plain(variable_get('logs_rollbar_rollbar_access_token_js', ''));
+  $env = check_plain(variable_get('logs_rollbar_uuid', 'development'));
+
+  // I had some issues appending this via jQuery and using Drupal.behaviors,
+  // so have opted to use javascript, in line with Rollbar.com
+  // documentation this is essentially an exact copy of the code
+  // located @ https://rollbar.com/docs/items_js/
+  $js = "
+    var _rollbarConfig = {
+    accessToken:\"" . $token . "\",
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    endpoint: \"" . $url . "\",
+    payload: {
+      environment:\"" . $env . "\"
+    }
+  };
+  // Rollbar Snippet
+  !function(r){function e(n){if(o[n])return o[n].exports;var t=o[n]={exports:{},id:n,loaded:!1};return r[n].call(t.exports,t,t.exports,e),t.loaded=!0,t.exports}var o={};return e.m=r,e.c=o,e.p=\"\",e(0)}([function(r,e,o){\"use strict\";var n=o(1).Rollbar,t=o(2);_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||\"https://cdnjs.cloudflare.com/ajax/libs/rollbar.js/1.9.4/rollbar.min.js\";var a=n.init(window,_rollbarConfig),i=t(a,_rollbarConfig);a.loadFull(window,document,!_rollbarConfig.async,_rollbarConfig,i)},function(r,e){\"use strict\";function o(r){return function(){try{return r.apply(this,arguments)}catch(r){try{console.error(\"[Rollbar]: Internal error\",r)}catch(r){}}}}function n(r,e,o){window._rollbarWrappedError&&(o[4]||(o[4]=window._rollbarWrappedError),o[5]||(o[5]=window._rollbarWrappedError._rollbarContext),window._rollbarWrappedError=null),r.uncaughtError.apply(r,o),e&&e.apply(window,o)}function t(r){var e=function(){var e=Array.prototype.slice.call(arguments,0);n(r,r._rollbarOldOnError,e)};return e.belongsToShim=!0,e}function a(r){this.shimId=++c,this.notifier=null,this.parentShim=r,this._rollbarOldOnError=null}function i(r){var e=a;return o(function(){if(this.notifier)return this.notifier[r].apply(this.notifier,arguments);var o=this,n=\"scope\"===r;n&&(o=new e(this));var t=Array.prototype.slice.call(arguments,0),a={shim:o,method:r,args:t,ts:new Date};return window._rollbarShimQueue.push(a),n?o:void 0})}function l(r,e){if(e.hasOwnProperty&&e.hasOwnProperty(\"addEventListener\")){var o=e.addEventListener;e.addEventListener=function(e,n,t){o.call(this,e,r.wrap(n),t)};var n=e.removeEventListener;e.removeEventListener=function(r,e,o){n.call(this,r,e&&e._wrapped?e._wrapped:e,o)}}}var c=0;a.init=function(r,e){var n=e.globalAlias||\"Rollbar\";if(\"object\"==typeof r[n])return r[n];r._rollbarShimQueue=[],r._rollbarWrappedError=null,e=e||{};var i=new a;return o(function(){if(i.configure(e),e.captureUncaught){i._rollbarOldOnError=r.onerror,r.onerror=t(i);var o,a,c=\"EventTarget,Window,Node,ApplicationCache,AudioTrackList,ChannelMergerNode,CryptoOperation,EventSource,FileReader,HTMLUnknownElement,IDBDatabase,IDBRequest,IDBTransaction,KeyOperation,MediaController,MessagePort,ModalWindow,Notification,SVGElementInstance,Screen,TextTrack,TextTrackCue,TextTrackList,WebSocket,WebSocketWorker,Worker,XMLHttpRequest,XMLHttpRequestEventTarget,XMLHttpRequestUpload\".split(\",\");for(o=0;o<c.length;++o)a=c[o],r[a]&&r[a].prototype&&l(i,r[a].prototype)}return e.captureUnhandledRejections&&(i._unhandledRejectionHandler=function(r){var e=r.reason,o=r.promise,n=r.detail;!e&&n&&(e=n.reason,o=n.promise),i.unhandledRejection(e,o)},r.addEventListener(\"unhandledrejection\",i._unhandledRejectionHandler)),r[n]=i,i})()},a.prototype.loadFull=function(r,e,n,t,a){var i=function(){var e;if(void 0===r._rollbarPayloadQueue){var o,n,t,i;for(e=new Error(\"rollbar.js did not load\");o=r._rollbarShimQueue.shift();)for(t=o.args,i=0;i<t.length;++i)if(n=t[i],\"function\"==typeof n){n(e);break}}\"function\"==typeof a&&a(e)},l=!1,c=e.createElement(\"script\"),p=e.getElementsByTagName(\"script\")[0],s=p.parentNode;c.crossOrigin=\"\",c.src=t.rollbarJsUrl,c.async=!n,c.onload=c.onreadystatechange=o(function(){if(!(l||this.readyState&&\"loaded\"!==this.readyState&&\"complete\"!==this.readyState)){c.onload=c.onreadystatechange=null;try{s.removeChild(c)}catch(r){}l=!0,i()}}),s.insertBefore(c,p)},a.prototype.wrap=function(r,e){try{var o;if(o=\"function\"==typeof e?e:function(){return e||{}},\"function\"!=typeof r)return r;if(r._isWrap)return r;if(!r._wrapped){r._wrapped=function(){try{return r.apply(this,arguments)}catch(e){throw\"string\"==typeof e&&(e=new String(e)),e._rollbarContext=o()||{},e._rollbarContext._wrappedSource=r.toString(),window._rollbarWrappedError=e,e}},r._wrapped._isWrap=!0;for(var n in r)r.hasOwnProperty(n)&&(r._wrapped[n]=r[n])}return r._wrapped}catch(e){return r}};for(var p=\"log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError,unhandledRejection\".split(\",\"),s=0;s<p.length;++s)a.prototype[p[s]]=i(p[s]);r.exports={Rollbar:a,_rollbarWindowOnError:n}},function(r,e){\"use strict\";r.exports=function(r,e){return function(o){if(!o&&!window._rollbarInitialized){var n=window.RollbarNotifier,t=e||{},a=t.globalAlias||\"Rollbar\",i=window.Rollbar.init(t,r);i._processShimQueue(window._rollbarShimQueue||[]),window[a]=i,window._rollbarInitialized=!0,n.processPayloads()}}}}]);
+  // End Rollbar Snippet";
+
+  // Add the function, we add it after drupal
+  // and jquery have been loaded.
+  // but before everything else.
+  drupal_add_js($js, array(
+    'type' => 'inline',
+    'scope' => 'header',
+    'weight' => -99,
+    'group' => JS_LIBRARY
+  ));
+}
+
+
+/**
+ * Register an event in a static cache.
+ *
+ * To prevent multiple registration of the same error, we check that identical
+ * events are not captured twice, thus reducing the final HTTP requests needed.
+ *
+ * @param array $log_entry
+ *   The entry log as passed from hook_watchdog().
+ */
+function logs_rollbar_register_event(array $log_entry) {
+  if (!logs_rollbar_get_http_url()) {
+    return;
+  }
+
+  $events = &drupal_static('logs_rollbar_events', array());
+
+  $event = array(
+    'timestamp' => $log_entry['timestamp'],
+    'type' => $log_entry['type'],
+    'ip' => $log_entry['ip'],
+    'request_uri' => $log_entry['request_uri'],
+    'referer' => $log_entry['referer'],
+    'uid' => $log_entry['uid'],
+    'link' => strip_tags($log_entry['link']),
+    'message' => empty($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']),
+    'severity' => $log_entry['severity'],
+  );
+
+  if (!empty($log_entry['variables']['exception_trace'])) {
+    // @todo: We avoid unserializing as it seems to causes Logs to fail
+    // to index event as JSON.
+    $event['exception_trace'] = base64_decode($log_entry['variables']['exception_trace']);
+  }
+
+  if ($uuid = variable_get('logs_rollbar_uuid')) {
+    $event['uuid'] = $uuid;
+  }
+
+  // Remove empty values, to prevent errors in the indexing of the JSON.
+  $event = logs_rollbar_array_remove_empty($event);
+
+  // Prevent identical events.
+  $event_clone = $event;
+  unset($event_clone['timestamp']);
+  $key = md5(serialize($event_clone));
+  $events[$key] = $event;
+}
+
+/**
+ * Get the registered events from the static cache.
+ *
+ * @return array
+ *   Array of events.
+ */
+function logs_rollbar_get_registered_events() {
+  $events = &drupal_static('logs_rollbar_events', array());
+  return $events;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function logs_rollbar_permission() {
+  $permissions = array();
+
+  $permissions['administer logs http client'] = array(
+    'title' => t('Administer Logs HTTP client'),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_watchdog().
+ *
+ * Register watchdog events.
+ */
+function logs_rollbar_watchdog(array $log_entry) {
+  if ($log_entry['severity'] > variable_get('logs_rollbar_severity_level', WATCHDOG_ERROR)) {
+    // Severity level is above the ones we want to log.
+    return;
+  }
+
+  logs_rollbar_register_event($log_entry);
+}
+
+/**
+ * Return the endpoint URL to POST data to.
+ *
+ * @return string
+ *   Return the URL if exists, or NULL if disabled.
+ */
+function logs_rollbar_get_http_url() {
+  if (!variable_get('logs_rollbar_enabled', TRUE) || !variable_get('logs_rollbar_url')) {
+    // Don't register the event.
+    return FALSE;
+  }
+
+  return variable_get('logs_rollbar_url');
+}
+
+/**
+ * Deep array filter.
+ *
+ * Remove empty values.
+ *
+ * @param $haystack
+ *   The variable to filter.
+ *
+ * @return mixed
+ */
+function logs_rollbar_array_remove_empty($haystack) {
+  foreach ($haystack as $key => $value) {
+    if (is_array($value)) {
+      $haystack[$key] = logs_rollbar_array_remove_empty($haystack[$key]);
+    }
+
+    if (empty($haystack[$key])) {
+      unset($haystack[$key]);
+    }
+  }
+
+  return $haystack;
+}
+
