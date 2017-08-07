@@ -12,14 +12,9 @@ This module depends on composer_manager.
 * Go to ```admin/config/system/composer-manager``` and make sure Rollbar library is available.
 * Go to ```admin/config/services/logs-http-client``` and set the settings
 
-### For live env add to settings PHP something like this:
-```php
-if (!empty($_ENV)) {
-  $conf['logs_rollbar_url'] = 'http://api.rollbar.com/api/1/';
-  $conf['logs_rollbar_uuid'] = $_ENV['PANTHEON_SITE_NAME'] . '-' . $_ENV['PANTHEON_ENVIRONMENT'];
-  }
-```
-
+### For live env uuid
+For platform sh and panthein env uuis are set automatically.
+see logs_rollbar_get_env_uuid().
 
 ## Make file
 

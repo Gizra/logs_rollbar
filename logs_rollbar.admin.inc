@@ -63,7 +63,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Unique ID'),
     '#description' => t('An arbitrary ID that will identify the environment.'),
-    '#default_value' => variable_get('logs_rollbar_uuid', drupal_get_profile() . '-local'),
+    '#default_value' => logs_rollbar_get_env_uuid(),
   );
 
   return system_settings_form($form);

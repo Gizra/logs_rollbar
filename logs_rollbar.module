@@ -117,7 +117,7 @@ function logs_rollbar_rollbar_post($events, $url) {
     'access_token' => variable_get('logs_rollbar_rollbar_access_token', NULL),
     'local_username' => isset($user->name) ? $user->name : 'anonymous',
     // optional - environment name. any string will do.
-    'environment' => variable_get('logs_rollbar_uuid', 'development'),
+    'environment' => logs_rollbar_get_env_uuid(),
     'base_api_url' => $url,
   );
   // Log with Rollbar
@@ -164,7 +164,7 @@ function logs_rollbar_init() {
   }
   // Client settings.
   $token = check_plain(variable_get('logs_rollbar_rollbar_access_token_js', ''));
-  $env = check_plain(variable_get('logs_rollbar_uuid', 'development'));
+  $env = check_plain(logs_rollbar_get_env_uuid());
 
   // I had some issues appending this via jQuery and using Drupal.behaviors,
   // so have opted to use javascript, in line with Rollbar.com
@@ -230,7 +230,7 @@ function logs_rollbar_register_event(array $log_entry) {
     $event['exception_trace'] = base64_decode($log_entry['variables']['exception_trace']);
   }
 
-  if ($uuid = variable_get('logs_rollbar_uuid')) {
+  if ($uuid = logs_rollbar_get_env_uuid()) {
     $event['uuid'] = $uuid;
   }
 
@@ -319,5 +319,29 @@ function logs_rollbar_array_remove_empty($haystack) {
   }
 
   return $haystack;
+}
+
+/**
+ * Get default env uuid.
+ *
+ * @return string
+ */
+function logs_rollbar_get_env_uuid() {
+  // Pantheon uniquie ID.
+  if (getenv('PANTHEON_SITE_NAME')) {
+    // Set server uuid to ENV.dev / ENV.test ...
+    $server_uuid =  getenv('PANTHEON_SITE_NAME') . '.' . getenv('PLATFORM_ENVIRONMENT');
+  }
+  // Platform sh Unique.
+  elseif (getenv('PANTHEON_ENVIRONMENT')) {
+    $server_uuid = getenv('PANTHEON_ENVIRONMENT');
+  }
+  // Other local env.
+  else {
+    $server_uuid = drupal_get_profile() . '-local';
+
+  }
+
+  return variable_get('logs_rollbar_uuid', $server_uuid);
 }
 
