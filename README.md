@@ -10,7 +10,7 @@ This module depends on composer_manager.
 
 * Enable the module
 * Go to ```admin/config/system/composer-manager``` and make sure Rollbar library is available.
-* Go to ```admin/config/services/logs-http-client``` and set the settings
+* Go to ```admin/config/services/logs-rollbar-settings``` and set the settings
 
 ### For live env uuid
 For platform sh and pantheon hosts env uuids are set automatically.
