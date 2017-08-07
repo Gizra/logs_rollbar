@@ -11,10 +11,10 @@
 function logs_rollbar_menu() {
   $items = array();
 
-  $items['admin/config/services/logs-http-client'] = array(
+  $items['admin/config/services/logs-rollbar-settings'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Logs Rollbar Client',
-    'description' => 'Administer Logs Client settings.',
+    'description' => 'Administer Rollbar Client settings.',
     'access arguments' => array('administer logs Rollbar client'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('logs_rollbar_admin_settings'),
