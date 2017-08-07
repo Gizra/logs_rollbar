@@ -13,7 +13,7 @@ This module depends on composer_manager.
 * Go to ```admin/config/services/logs-http-client``` and set the settings
 
 ### For live env uuid
-For platform sh and panthein env uuis are set automatically.
+For platform sh and pantheon hosts env uuids are set automatically.
 see logs_rollbar_get_env_uuid().
 
 ## Make file
