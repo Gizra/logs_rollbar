@@ -18,3 +18,14 @@ if (!empty($_ENV)) {
   $conf['logs_rollbar_url'] = 'http://api.rollbar.com/api/1/';
   $conf['logs_rollbar_uuid'] = $_ENV['PANTHEON_SITE_NAME'] . '-' . $_ENV['PANTHEON_ENVIRONMENT'];
 ```
+
+
+## Make file
+
+```make
+projects[logs_rollbar][type] = "module"
+projects[logs_rollbar][subdir] = "contrib"
+projects[logs_rollbar][download][type] = "git"
+projects[logs_rollbar][download][branch] = "master"
+projects[logs_rollbar][download][url] = "https://github.com/Gizra/logs_rollbar.git"
+```
