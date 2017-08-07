@@ -330,11 +330,11 @@ function logs_rollbar_get_env_uuid() {
   // Pantheon uniquie ID.
   if (getenv('PANTHEON_SITE_NAME')) {
     // Set server uuid to ENV.dev / ENV.test ...
-    $server_uuid =  getenv('PANTHEON_SITE_NAME') . '.' . getenv('PLATFORM_ENVIRONMENT');
+    $server_uuid =  getenv('PANTHEON_SITE_NAME') . '.' . getenv('PANTHEON_ENVIRONMENT');
   }
   // Platform sh Unique.
-  elseif (getenv('PANTHEON_ENVIRONMENT')) {
-    $server_uuid = getenv('PANTHEON_ENVIRONMENT');
+  elseif (getenv('PLATFORM_ENVIRONMENT')) {
+    $server_uuid = getenv('PLATFORM_ENVIRONMENT');
   }
   // Other local env.
   else {
