@@ -9,6 +9,12 @@
  * Logs HTTP POST API Configuration Form.
  */
 function logs_rollbar_admin_settings($form, &$form_state) {
+  $uuid = logs_rollbar_get_env_uuid();
+
+  $form['logs_rollbar_uuid'] = array(
+    '#markup' => "<label>UUID:</label><strong>$uuid</strong><div>The ID that will identify the environment.</div></br>",
+  );
+
   $form['logs_rollbar_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log to Rollbar enabled'),
@@ -59,10 +65,6 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#description' => t('The minimum severity level to be reached before an event is pushed to Logs.'),
   );
 
-  $form['logs_rollbar_uuid'] = array(
-    '#markup' => logs_rollbar_get_env_uuid(),
-    '#description' => t('The ID that will identify the environment.'),
-  );
 
   return system_settings_form($form);
 }
