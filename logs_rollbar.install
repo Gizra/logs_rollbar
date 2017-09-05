@@ -14,5 +14,4 @@ function logs_rollbar_uninstall() {
   variable_del('logs_rollbar_rollbar_access_token');
   variable_del('logs_rollbar_rollbar_access_token_js');
   variable_del('logs_rollbar_severity_level');
-  variable_del('logs_rollbar_uuid');
 }

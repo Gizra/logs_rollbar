@@ -60,10 +60,8 @@ function logs_rollbar_admin_settings($form, &$form_state) {
   );
 
   $form['logs_rollbar_uuid'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Unique ID'),
-    '#description' => t('An arbitrary ID that will identify the environment.'),
-    '#default_value' => logs_rollbar_get_env_uuid(),
+    '#markup' => logs_rollbar_get_env_uuid(),
+    '#description' => t('The ID that will identify the environment.'),
   );
 
   return system_settings_form($form);

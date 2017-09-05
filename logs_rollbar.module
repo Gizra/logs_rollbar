@@ -153,7 +153,6 @@ function logs_rollbar_rollbar_post($events, $url) {
  * Implements hook_init().
  */
 function logs_rollbar_init() {
-
   // If php support is turned off then return.
   if (!variable_get('logs_rollbar_rollbar_access_token_js', 0)) {
     return;
@@ -338,10 +337,10 @@ function logs_rollbar_get_env_uuid() {
   }
   // Other local env.
   else {
-    $server_uuid = drupal_get_profile() . '-local';
+    $server_uuid = drupal_get_profile() . '-local-' . gethostname();
 
   }
 
-  return variable_get('logs_rollbar_uuid', $server_uuid);
+  return $server_uuid;
 }
 
