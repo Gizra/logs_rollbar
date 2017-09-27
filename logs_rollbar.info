@@ -2,6 +2,4 @@ name = logs_rollbar
 description = "Client for the Logs Rollbar API"
 core = "7.x"
 
-dependencies[] = composer_manager
-
 files[] = tests/LogsRollbarRegisterEventTestCase.test
