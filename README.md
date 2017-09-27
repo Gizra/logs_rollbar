@@ -4,12 +4,25 @@
 
 > Provides JSON event pushing to Logs via the tag/http endpoint.
 
-This module depends on composer_manager.
+This module depends on the `rollbar` library, preferably installed using composer.
+
+A simple method of installing it is using the `composer_manager` module.
+
+OR adding `rollbar/rollbar` to your existing `composer.json`:
+
+```json
+{
+    "require": {
+        "rollbar/rollbar": "0.18.2"
+    }
+}
+
+```
 
 # Installation
 
 * Enable the module
-* Go to ```admin/config/system/composer-manager``` and make sure Rollbar library is available.
+* Go to ```admin/config/system/composer-manager``` (if installed) and make sure Rollbar library is available.
 * Go to ```admin/config/services/logs-rollbar-settings``` and set the settings
 
 ### For live env uuid
