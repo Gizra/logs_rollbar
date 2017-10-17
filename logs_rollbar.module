@@ -337,6 +337,7 @@ function logs_rollbar_get_env_uuid() {
   }
   // Other local env.
   else {
+    require_once DRUPAL_ROOT . '/includes/common.inc';
     $server_uuid = drupal_get_profile() . '-local-' . gethostname();
 
   }
