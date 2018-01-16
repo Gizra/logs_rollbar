@@ -337,7 +337,7 @@ function logs_rollbar_get_env_uuid() {
   }
   // Acquia unique ID.
   elseif (getenv('AH_SITE_GROUP')) {
-    $server_uuid = $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT']
+    $server_uuid = $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'];
   }
   // Other local env.
   else {
