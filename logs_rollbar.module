@@ -171,12 +171,12 @@ function logs_rollbar_init() {
   // located @ https://rollbar.com/docs/notifier/rollbar.js
   $js = <<<END
     var _rollbarConfig = {
-    accessToken:\"" . $token . "\",
+    accessToken: "$token",
     captureUncaught: true,
     captureUnhandledRejections: true,
-    endpoint: \"" . $url . "\",
+    endpoint: "$url",
     payload: {
-      environment:\"" . $env . "\"
+      environment: "$env"
     }
   };
   // Rollbar Snippet
