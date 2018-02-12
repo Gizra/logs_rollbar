@@ -158,7 +158,7 @@ function logs_rollbar_init() {
     return;
   }
   // If not disabled.
-  if (!$url = logs_rollbar_get_http_url()) {
+  if (!$base_url = logs_rollbar_get_http_url()) {
     return;
   }
   // Client settings.
@@ -174,7 +174,7 @@ function logs_rollbar_init() {
     accessToken: "$token",
     captureUncaught: true,
     captureUnhandledRejections: true,
-    endpoint: "$url",
+    endpoint: "{$base_url}item/",
     payload: {
       environment: "$env"
     }
