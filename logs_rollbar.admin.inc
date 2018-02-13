@@ -27,7 +27,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#size' => 100,
     '#title' => t('Endpoint'),
     '#description' => t('The URL to POST the data to.'),
-    '#default_value' => variable_get('logs_rollbar_url', 'http://api.rollbar.com/api/1/'),
+    '#default_value' => variable_get('logs_rollbar_url', 'https://api.rollbar.com/api/1/'),
   );
 
   $form['logs_rollbar_rollbar_access_token'] = array(
