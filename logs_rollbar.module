@@ -289,12 +289,12 @@ function logs_rollbar_watchdog(array $log_entry) {
  *   Return the URL if exists, or NULL if disabled.
  */
 function logs_rollbar_get_http_url() {
-  if (!variable_get('logs_rollbar_enabled', TRUE) || !variable_get('logs_rollbar_url')) {
+  if (!variable_get('logs_rollbar_enabled', TRUE)) {
     // Don't register the event.
     return FALSE;
   }
 
-  return variable_get('logs_rollbar_url');
+  return variable_get('logs_rollbar_url', 'https://api.rollbar.com/api/1/');
 }
 
 /**
