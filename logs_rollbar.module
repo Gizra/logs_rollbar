@@ -294,8 +294,36 @@ function logs_rollbar_get_http_url() {
     return FALSE;
   }
 
+  // Auto disable on local.
+  if (variable_get('logs_rollbar_auto_disable_on_local', TRUE) && logs_rollbar_is_local()) {
+    return FALSE;
+  }
+
   return variable_get('logs_rollbar_url', 'https://api.rollbar.com/api/1/');
 }
+
+/**
+ * Check if local env.
+ *
+ * @return bool
+ */
+function logs_rollbar_is_local() {
+  // Pantheon unique ID.
+  if (getenv('PANTHEON_SITE_NAME')) {
+    return FALSE;
+  }
+  // Platform sh unique ID.
+  elseif (getenv('PLATFORM_ENVIRONMENT')) {
+    return FALSE;
+  }
+  // Acquia unique ID.
+  elseif (getenv('AH_SITE_GROUP')) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 
 /**
  * Deep array filter.
