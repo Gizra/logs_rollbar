@@ -46,6 +46,12 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('logs_rollbar_rollbar_access_token_js', 0),
   );
 
+  $form['logs_rollbar_auto_disable_on_local'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Automatically disable on local'),
+    '#default_value' => variable_get('logs_rollbar_auto_disable_on_local', TRUE),
+  );
+
   $options = array(
     WATCHDOG_EMERGENCY => t('Emergency'),
     WATCHDOG_ALERT => t('Alert'),
