@@ -164,6 +164,7 @@ function logs_rollbar_init() {
   // Client settings.
   $token = check_plain(variable_get('logs_rollbar_rollbar_access_token_js', ''));
   $env = check_plain(logs_rollbar_get_env_uuid());
+  $messages_to_ignore = logs_rollbar_get_ignored_messages();
 
   // I had some issues appending this via jQuery and using Drupal.behaviors,
   // so have opted to use javascript, in line with Rollbar.com
@@ -172,6 +173,7 @@ function logs_rollbar_init() {
   $js = <<<END
     var _rollbarConfig = {
     accessToken: "$token",
+    ignoredMessages: $messages_to_ignore,
     captureUncaught: true,
     captureUnhandledRejections: true,
     endpoint: "{$base_url}item/",
@@ -377,3 +379,23 @@ function logs_rollbar_get_env_uuid() {
   return $server_uuid;
 }
 
+/**
+ * Returns formatted list of comma separated messages, for Rollbar to ignore.
+ *
+ * @return string
+ *   Formatted list of comma separated messages, Rollbar will ignore.
+ */
+function logs_rollbar_get_ignored_messages() {
+  $ignored_messages = variable_get('logs_rollbar_ignored_messages', '');
+
+  $messages_to_ignore = array();
+  foreach (explode(',', $ignored_messages) as $message) {
+    if ($length = strlen($message) === 0) {
+      continue;
+    }
+    $message = $message[0] == '\'' ? $message : '\'' . $message;
+    $messages_to_ignore[] = $message[$length - 1] == '\'' ? $message : $message . '\'';
+  }
+
+  return count($messages_to_ignore) == 0 ? '[]' : '[' . implode(', ', $messages_to_ignore) . ']';
+}

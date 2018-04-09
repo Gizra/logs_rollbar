@@ -52,6 +52,14 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('logs_rollbar_auto_disable_on_local', TRUE),
   );
 
+  $form['logs_rollbar_ignored_messages'] = array(
+    '#type' => 'textfield',
+    '#size' => 2048,
+    '#title' => t('Ignored Messages'),
+    '#description' => t('Comma separated exceptions messages which Rollbar ignore'),
+    '#default_value' => variable_get('logs_rollbar_ignored_messages', ''),
+  );
+
   $options = array(
     WATCHDOG_EMERGENCY => t('Emergency'),
     WATCHDOG_ALERT => t('Alert'),
