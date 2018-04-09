@@ -380,13 +380,13 @@ function logs_rollbar_get_env_uuid() {
 }
 
 /**
- * Returns formatted list of comma separated messages, for Rollbar to ignore.
+ * Returns a list of comma separated clientside messages, for Rollbar to ignore.
  *
  * @return string
  *   Formatted list of comma separated messages, Rollbar will ignore.
  */
-function logs_rollbar_get_ignored_messages() {
-  $ignored_messages = variable_get('logs_rollbar_ignored_messages', '');
+function logs_rollbar_get_ignored_clientside_messages() {
+  $ignored_messages = variable_get('logs_rollbar_ignored_clientside_messages', '');
 
   $messages_to_ignore = array();
   foreach (explode(',', $ignored_messages) as $message) {
@@ -397,5 +397,5 @@ function logs_rollbar_get_ignored_messages() {
     $messages_to_ignore[] = $message[$length - 1] == '\'' ? $message : $message . '\'';
   }
 
-  return count($messages_to_ignore) == 0 ? '[]' : '[' . implode(', ', $messages_to_ignore) . ']';
+  return '[' . implode(', ', $messages_to_ignore) . ']';
 }

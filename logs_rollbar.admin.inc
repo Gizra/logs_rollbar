@@ -52,12 +52,12 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('logs_rollbar_auto_disable_on_local', TRUE),
   );
 
-  $form['logs_rollbar_ignored_messages'] = array(
+  $form['logs_rollbar_ignored_clientside_messages'] = array(
     '#type' => 'textfield',
     '#size' => 2048,
-    '#title' => t('Ignored Messages'),
+    '#title' => t('Ignored Client Side Exception Messages'),
     '#description' => t('Comma separated client-side exceptions messages which Rollbar ignores. Regular expressions are supported.'),
-    '#default_value' => variable_get('logs_rollbar_ignored_messages', ''),
+    '#default_value' => variable_get('logs_rollbar_ignored_clientside_messages', ''),
   );
 
   $options = array(
