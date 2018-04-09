@@ -164,7 +164,7 @@ function logs_rollbar_init() {
   // Client settings.
   $token = check_plain(variable_get('logs_rollbar_rollbar_access_token_js', ''));
   $env = check_plain(logs_rollbar_get_env_uuid());
-  $messages_to_ignore = logs_rollbar_get_ignored_messages();
+  $messages_to_ignore = logs_rollbar_get_ignored_clientside_messages();
 
   // I had some issues appending this via jQuery and using Drupal.behaviors,
   // so have opted to use javascript, in line with Rollbar.com
