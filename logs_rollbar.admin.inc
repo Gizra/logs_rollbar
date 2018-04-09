@@ -56,7 +56,7 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#size' => 2048,
     '#title' => t('Ignored Messages'),
-    '#description' => t('Comma separated exceptions messages which Rollbar ignore'),
+    '#description' => t('Comma separated client-side exceptions messages which Rollbar ignores. Regular expressions are supported.'),
     '#default_value' => variable_get('logs_rollbar_ignored_messages', ''),
   );
 
