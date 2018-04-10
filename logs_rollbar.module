@@ -390,10 +390,12 @@ function logs_rollbar_get_ignored_clientside_messages() {
 
   $messages_to_ignore = array();
   foreach (explode(',', $ignored_messages) as $message) {
+    $message = trim($message);
+
     if ($length = strlen($message) === 0) {
       continue;
     }
-    $message = trim($message);
+
     $message = $message[0] == '\'' ? $message : '\'' . $message;
     $messages_to_ignore[] = $message[$length - 1] == '\'' ? $message : $message . '\'';
   }
