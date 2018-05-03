@@ -86,10 +86,13 @@ function _logs_rollbar_decode_exception($exception) {
     $return['exception_trace'] = drupal_base64_encode(serialize($exception->getTrace()));
   }
   catch (Exception $e) {
-    $return['exception_trace']  = $e->getMessage();
+    // There are some non-serializable structures as Closures, this is to
+    // prevent a PHP fatal error when there's such a construct in the
+    // trace.
+    $return['exception_trace'] = drupal_base64_encode(serialize($e->getMessage()));
   }
-  return $return;
 
+  return $return;
 }
 
 /**
