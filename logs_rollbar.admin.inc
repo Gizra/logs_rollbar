@@ -53,10 +53,9 @@ function logs_rollbar_admin_settings($form, &$form_state) {
   );
 
   $form['logs_rollbar_ignored_clientside_messages'] = array(
-    '#type' => 'textfield',
-    '#size' => 2048,
+    '#type' => 'textarea',
     '#title' => t('Ignored Client Side Exception Messages'),
-    '#description' => t('Comma separated client-side exceptions messages which Rollbar ignores. Regular expressions are supported.'),
+    '#description' => t('Client-side exceptions messages which Rollbar ignores (one on each line). Regular expressions are supported.'),
     '#default_value' => variable_get('logs_rollbar_ignored_clientside_messages', ''),
   );
 
@@ -78,7 +77,6 @@ function logs_rollbar_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('logs_rollbar_severity_level', WATCHDOG_ERROR),
     '#description' => t('The minimum severity level to be reached before an event is pushed to Logs.'),
   );
-
 
   return system_settings_form($form);
 }

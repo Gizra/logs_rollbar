@@ -82,7 +82,12 @@ function _logs_rollbar_decode_exception($exception) {
   // We have to serialize and encode the array here to prevent a notice in
   // theme_dblog_message(). We will decode the string back in
   // logs_rollbar_watchdog()
-  $return['exception_trace'] = drupal_base64_encode(serialize($exception->getTrace()));
+  try {
+    $return['exception_trace'] = drupal_base64_encode(serialize($exception->getTrace()));
+  }
+  catch (Exception $e) {
+    $return['exception_trace']  = $e->getMessage();
+  }
   return $return;
 
 }
@@ -380,7 +385,7 @@ function logs_rollbar_get_env_uuid() {
 }
 
 /**
- * Returns a list of comma separated clientside messages, for Rollbar to ignore.
+ * Returns a list of comma separated client side messages, for Rollbar to ignore.
  *
  * @return string
  *   Formatted list of comma separated messages, Rollbar will ignore.
@@ -389,15 +394,14 @@ function logs_rollbar_get_ignored_clientside_messages() {
   $ignored_messages = variable_get('logs_rollbar_ignored_clientside_messages', '');
 
   $messages_to_ignore = array();
-  foreach (explode(',', $ignored_messages) as $message) {
-    $message = trim($message);
+  foreach (explode(PHP_EOL, $ignored_messages) as $message) {
+    $message = addslashes(trim($message));
 
     if ($length = strlen($message) === 0) {
       continue;
     }
 
-    $message = $message[0] == '\'' ? $message : '\'' . $message;
-    $messages_to_ignore[] = $message[$length - 1] == '\'' ? $message : $message . '\'';
+    $messages_to_ignore[] = '\'' . $message . '\'';
   }
 
   return '[' . implode(', ', $messages_to_ignore) . ']';
