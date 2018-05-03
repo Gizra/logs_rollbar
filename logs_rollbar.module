@@ -398,13 +398,13 @@ function logs_rollbar_get_ignored_clientside_messages() {
 
   $messages_to_ignore = array();
   foreach (explode(PHP_EOL, $ignored_messages) as $message) {
-    $message = addslashes(trim($message));
+    $message = trim($message);
 
-    if ($length = strlen($message) === 0) {
+    if (strlen($message) === 0) {
       continue;
     }
 
-    $messages_to_ignore[] = '\'' . $message . '\'';
+    $messages_to_ignore[] =  json_encode($message);
   }
 
   return '[' . implode(', ', $messages_to_ignore) . ']';
