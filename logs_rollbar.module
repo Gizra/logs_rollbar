@@ -91,8 +91,8 @@ function _logs_rollbar_decode_exception($exception) {
     // trace.
     $return['exception_trace'] = drupal_base64_encode(serialize($e->getMessage()));
   }
-  return $return;
 
+  return $return;
 }
 
 /**
@@ -172,6 +172,7 @@ function logs_rollbar_init() {
   // Client settings.
   $token = check_plain(variable_get('logs_rollbar_rollbar_access_token_js', ''));
   $env = check_plain(logs_rollbar_get_env_uuid());
+  $messages_to_ignore = logs_rollbar_get_ignored_clientside_messages();
 
   // I had some issues appending this via jQuery and using Drupal.behaviors,
   // so have opted to use javascript, in line with Rollbar.com
@@ -180,6 +181,7 @@ function logs_rollbar_init() {
   $js = <<<END
     var _rollbarConfig = {
     accessToken: "$token",
+    ignoredMessages: $messages_to_ignore,
     captureUncaught: true,
     captureUnhandledRejections: true,
     endpoint: "{$base_url}item/",
@@ -385,3 +387,25 @@ function logs_rollbar_get_env_uuid() {
   return $server_uuid;
 }
 
+/**
+ * Returns a list of comma separated client side messages, for Rollbar to ignore.
+ *
+ * @return string
+ *   Formatted list of comma separated messages, Rollbar will ignore.
+ */
+function logs_rollbar_get_ignored_clientside_messages() {
+  $ignored_messages = variable_get('logs_rollbar_ignored_clientside_messages', '');
+
+  $messages_to_ignore = array();
+  foreach (explode(PHP_EOL, $ignored_messages) as $message) {
+    $message = trim($message);
+
+    if (strlen($message) === 0) {
+      continue;
+    }
+
+    $messages_to_ignore[] =  json_encode($message);
+  }
+
+  return '[' . implode(', ', $messages_to_ignore) . ']';
+}
